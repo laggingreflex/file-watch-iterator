@@ -19,9 +19,13 @@ npm i file-watch-iterator
 ```js
 const watch = require('file-watch-iterator')
 
-for await (const { files, changed } of watch('.')) {
-  // ...
-  // break
+for await (const files of watch('.')) {
+  for (const file of files.changed(a)) {
+    // ...
+  }
+  for (const file of files.deleted()) {
+    // ...
+  }
 }
 ```
 
@@ -37,8 +41,69 @@ for await (const { files, changed } of watch('.')) {
 
     * **`debounce=100`** Debounce between file change as well as an indicator of first ever "ready" event (when (initially) the files are "changed" (discovered) very rapidly)
 
-  * **Returns** an async-iterable which yields `{ files, changed }`
+  * **Returns** an async-iterable which yields a **`Files`** instance with the following structure:
 
-    * **`files`** Complete and updated list of files
-    * **`changed`** File changes since the last iteration. An object with keys of events fired by chokidar watcher containing a set of files corresponding to those events. E.g.: **`{add: [], change: [], unlink: [], ...}`**
+    * **`.files`** Complete and updated list of files:
 
+      Eg.:
+
+      ```js
+      {
+        '/example/a': {changed: false, event: 'add'},    // previously added
+        '/example/b': {changed: true,  event: 'change'}, // newly modified
+        '/example/c': {changed: true,  event: 'add'},    // newly added
+        '/example/d': {changed: true,  event: 'unlink'}, // newly deleted
+      }
+      ```
+
+      * **`<key>`** The `keys` are the actual file paths and values are:
+
+        * **`changed`** A boolean that's `true` for files that changed, `false` for the rest
+        * **`event`** Chokidar `event` corresponding to the file change
+
+      Note: This is more meant for internal use. You may find other methods more useful.
+
+    * **`[Symbol.iterator]()`** Returns an iterable of a modified `.files` object as: `{file, changed, event}` objects
+
+      Eg.:
+
+      ```js
+      for(const file of files) {
+        console.log(file)
+      }
+      ```
+      ```
+      {file: '/example/a', changed: false, event: 'add'}
+      {file: '/example/b', changed: true,  event: 'change'}
+      {file: '/example/c', changed: true,  event: 'add'}
+      {file: '/example/d', changed: true,  event: 'unlink'}
+      ```
+
+    * **`.changed(events)`** Returns an iterable of files whose `.changed = true` and `.event` is one of the `events` provided
+
+      * **`events = ['change', 'add']`** Events to match with the file's `.event`
+
+      Eg.:
+
+      ```js
+      for(const file of files.changed()) {
+        console.log(file)
+      }
+      ```
+      ```
+      /example/b
+      /example/c
+      ```
+
+    * **`.deleted()`** Alias for `.changed(['unlink'])`
+
+      Eg.:
+
+      ```js
+      for(const file of files.deleted()) {
+        console.log(file)
+      }
+      ```
+      ```
+      /example/d
+      ```
