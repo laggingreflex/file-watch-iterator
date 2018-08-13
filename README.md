@@ -41,6 +41,28 @@ for await (const files of watch('.')) {
 
     * **`debounce=100`** Debounce between file change as well as an indicator of first ever "ready" event (when (initially) the files are "changed" (discovered) very rapidly)
 
+    * **`interruptWaiting`** A promise that when rejected interrupts the watcher. See [async-iteration/issues/126]
+
+      E.g.: Iterating over two (merged) watchers, one of them errors, how to stop the other from forever awaiting for changes:
+
+      ```js
+      const merge = require('merge-async-iterators')
+      const interruptWaiting = defer();
+      const a = watch('/a', {interruptWaiting})
+      const b = watch('/b', {interruptWaiting})
+
+      try {
+        for await (const files of merge([a, b])) {
+          // error occurs in a
+        }
+      } finally {
+        // this stops b from waiting for changes
+        interruptWaiting.reject('cancel')
+      }
+      ```
+
+    [async-iteration/issues/126]: https://github.com/tc39/proposal-async-iteration/issues/126#issuecomment-403454433
+
   * **Returns** an async-iterable which yields a **`Files`** instance with the following structure:
 
     * **`.files`** Complete and updated list of files:
