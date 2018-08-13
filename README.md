@@ -63,7 +63,7 @@ for await (const files of watch('.')) {
 
       Note: This is more meant for internal use. You may find other methods more useful.
 
-    * **`[Symbol.iterator]()`** Returns an iterable of a modified `.files` object as: `{file, changed, event}` objects
+    * **`.toArray()`** Returns an iterable of a modified `.files` object as: `{file, changed, event}` objects
 
       Eg.:
 

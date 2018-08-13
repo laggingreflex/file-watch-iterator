@@ -31,7 +31,7 @@ module.exports = class Files {
 
   deleted() { return this.changed(['unlink']) }
 
-  [Symbol.iterator]() {
+  toArray() {
     return Object.entries(this.files || {}).map(([file, data]) => ({ file, ...data }));
   }
 }
