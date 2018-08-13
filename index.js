@@ -10,7 +10,7 @@ module.exports = async function*(paths, chokidarOpts = {}, opts = {}) {
   const resetDeferred = () => deferred = defer();
   resetDeferred();
 
-  const interruptWaiting = opts.interruptWaiting || new Promise(() => {});
+  const interrupt = opts.interrupt || new Promise(() => {});
 
   const on = debounce(queue => {
     queue.forEach(([event, file]) => {
@@ -26,7 +26,7 @@ module.exports = async function*(paths, chokidarOpts = {}, opts = {}) {
 
   try {
     while (true) {
-      await Promise.race([deferred.promise, interruptWaiting]);
+      await Promise.race([deferred.promise, interrupt]);
       yield files;
       files.resetChanged();
     }
