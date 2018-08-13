@@ -1,23 +1,17 @@
 const { watch } = require('chokidar');
 const debounce = require('debounce-queue');
-const defer = require('p-defer');
-const { Files } = require('./utils');
+const { Files, Defer } = require('./utils');
 
 module.exports = async function*(paths, chokidarOpts = {}, opts = {}) {
   const files = new Files();
-
-  let deferred;
-  const resetDeferred = () => deferred = defer();
-  resetDeferred();
-
-  const interrupt = opts.interrupt || new Promise(() => {});
+  const deferred = new Defer();
 
   const on = debounce(queue => {
     queue.forEach(([event, file]) => {
       files.update(file, { event });
     });
     deferred.resolve();
-    resetDeferred();
+    deferred.reset();
   }, { delay: opts.debounce || 100 });
 
   const watcher = watch(paths, { ...chokidarOpts, });
@@ -26,11 +20,12 @@ module.exports = async function*(paths, chokidarOpts = {}, opts = {}) {
 
   try {
     while (true) {
-      await Promise.race([deferred.promise, interrupt]);
+      await Promise.race([deferred, opts.interrupt].filter(Boolean));
       yield files;
       files.resetChanged();
     }
   } finally {
     watcher.close();
+    deferred.resolve();
   }
 };

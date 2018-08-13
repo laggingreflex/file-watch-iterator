@@ -1,3 +1,4 @@
-const utils = exports;
+const e = m => exports[m] = require('./' + m);
 
-utils.Files = require('./files');
+e('Files');
+e('Defer');
