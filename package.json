@@ -8,6 +8,7 @@
   },
   "repository": "laggingreflex/file-watch-iterator",
   "dependencies": {
+    "break-async-iterator": "^0.1.0",
     "chokidar": "^2.0.4",
     "debounce-queue": "^0.3.0",
     "p-defer": "^1.0.0"

@@ -1,8 +1,9 @@
 const { watch } = require('chokidar');
 const debounce = require('debounce-queue');
+const breakAI = require('break-async-iterator')
 const { Files, Defer } = require('./utils');
 
-module.exports = async function*(paths, chokidarOpts = {}, opts = {}) {
+module.exports = breakAI(breakable => async function*(paths, chokidarOpts = {}, opts = {}) {
   const files = new Files();
   const deferred = new Defer();
 
@@ -20,7 +21,7 @@ module.exports = async function*(paths, chokidarOpts = {}, opts = {}) {
 
   try {
     while (true) {
-      await Promise.race([deferred, opts.interrupt].filter(Boolean));
+      await breakable(deferred);
       yield files;
       files.resetChanged();
     }
@@ -28,4 +29,4 @@ module.exports = async function*(paths, chokidarOpts = {}, opts = {}) {
     watcher.close();
     deferred.resolve();
   }
-};
+});
