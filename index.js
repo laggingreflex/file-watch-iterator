@@ -6,6 +6,7 @@ const { Files, Defer } = require('./utils');
 module.exports = breakAI(breakable => async function*(paths, chokidarOpts = {}, opts = {}) {
   const files = new Files();
   const deferred = new Defer();
+  const yielded = new Defer();
 
   const on = debounce(queue => {
     queue.forEach(([event, file]) => {
@@ -13,6 +14,7 @@ module.exports = breakAI(breakable => async function*(paths, chokidarOpts = {}, 
     });
     deferred.resolve();
     deferred.reset();
+    return yielded;
   }, { delay: opts.debounce || 100 });
 
   const watcher = watch(paths, { ...chokidarOpts, });
@@ -23,6 +25,8 @@ module.exports = breakAI(breakable => async function*(paths, chokidarOpts = {}, 
     while (true) {
       await breakable(deferred);
       yield files;
+      yielded.resolve();
+      yielded.reset();
       files.resetChanged();
     }
   } finally {
