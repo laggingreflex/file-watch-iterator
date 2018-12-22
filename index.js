@@ -12,9 +12,11 @@ module.exports = breakAI(breakable => async function*(paths, chokidarOpts = {}, 
     queue.forEach(([event, file]) => {
       files.update(file, { event });
     });
-    deferred.resolve();
-    deferred.reset();
-    return yielded;
+    if (files.size) {
+      deferred.resolve();
+      deferred.reset();
+      return yielded;
+    }
   }, { delay: opts.debounce || 100 });
 
   const watcher = watch(paths, { ...chokidarOpts, });
