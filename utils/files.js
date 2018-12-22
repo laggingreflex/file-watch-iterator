@@ -34,4 +34,7 @@ module.exports = class Files {
   toArray() {
     return Object.entries(this.files || {}).map(([file, data]) => ({ file, ...data }));
   }
+
+  get size() { return Object.keys(this.files).length }
+
 }
