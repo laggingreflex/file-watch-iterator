@@ -1,3 +1,7 @@
+/**
+ * Files
+ *
+ */
 module.exports = class Files {
   constructor(files = {}) {
     this.files = files;

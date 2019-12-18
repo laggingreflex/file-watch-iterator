@@ -3,6 +3,15 @@ const debounce = require('debounce-queue');
 const breakAI = require('break-async-iterator')
 const { Files, Defer, ...utils } = require('./utils');
 
+/**
+ * Watch files as an async iterator
+ * @param {string} paths file, dir, glob, or array - passed to chokidar.watch
+ * @param {object} chokidarOpts options for chokidar.watch
+ * @param {object} opts
+ * @param {number} [opts.debounce=100] Debounced delay for each event
+ * @param {number} [opts.readyTimeout=1000] Debounced timeout that fires after initial discovery of files has most likely been finished
+ * @returns {AsyncIterableIterator<Files>} files
+ */
 module.exports = breakAI(breakable => async function*(paths, chokidarOpts = {}, opts = {}) {
   const files = new Files();
   const deferred = new Defer();
